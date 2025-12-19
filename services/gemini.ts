@@ -17,10 +17,12 @@ let chatSession: any = null;
  */
 export const chatWithMintaka = async (message: string, context: string = "") => {
   try {
+    // FIX: Provide a default system prompt if context is missing
+    const systemPrompt = context || "You are Mintaka, the helpful AI partner for Orion Dev Core. Keep your answers professional and concise.";
+
     const model = genAI.getGenerativeModel({
       model: "gemini-1.5-pro",
-      // This is where we feed the AI the "Briefing" about the partner
-      systemInstruction: context || "You are Mintaka, the helpful AI partner for Orion Dev Core.",
+      systemInstruction: systemPrompt,
     });
 
     if (!chatSession) {
@@ -28,26 +30,23 @@ export const chatWithMintaka = async (message: string, context: string = "") => 
         history: [],
         generationConfig: {
           maxOutputTokens: 1000,
-          temperature: 0.7, // Keeps her witty but accurate
+          temperature: 0.8, // Slightly higher for better flow
         },
       });
     }
 
     const result = await chatSession.sendMessage(message);
     const response = await result.response;
-    const text = response.text();
+    
+    // FIX: Verify text exists before trying to read it
+    if (!response || !response.text()) {
+      throw new Error("Empty AI Response");
+    }
 
-    // We return it in the format Chat.tsx expects
-    return {
-      text: text,
-      analysis: null // We can add smart analysis later!
-    };
+    return { text: response.text(), analysis: null };
   } catch (error) {
     console.error("Mintaka Brain Error:", error);
+    // Rethrowing so Chat.tsx can show the alert
     throw error;
   }
-};
-
-export const resetChat = () => {
-  chatSession = null;
 };
