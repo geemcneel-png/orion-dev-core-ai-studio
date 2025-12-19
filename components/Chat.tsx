@@ -3,6 +3,26 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+// Inside your React Component
+const [isAuthorized, setIsAuthorized] = useState(false);
+const [partner, setPartner] = useState(null);
+
+const handleAccess = async (inputBioId) => {
+  const response = await fetch('/api/verify-partner', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bio_id: inputBioId })
+  });
+  
+  const result = await response.json();
+  if (result.status === 'success') {
+    setPartner(result);
+    setIsAuthorized(true);
+    alert(`Welcome back, ${result.name}! System Initialized.`);
+  } else {
+    alert("Access Denied. Bio-ID invalid.");
+  }
+};
 import React, { useState, useRef, useEffect } from 'react';
 import { PaperAirplaneIcon, SparklesIcon, ShieldCheckIcon, BeakerIcon, ChartPieIcon, ArrowPathIcon } from '@heroicons/react/24/solid';
 import { chatWithMintaka, resetChat as resetGeminiSession } from '../services/gemini';
