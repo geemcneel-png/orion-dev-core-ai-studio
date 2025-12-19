@@ -1,9 +1,12 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
 import React, { useState } from 'react';
+
+// New constants as requested
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby8Ll0pOI4UztWST-z-w2ddjGzvgrMDR357WNp4Vmhg0R-VgaD-PSjgWclysxY9XbQY4A/exec";
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1451321313065959628/YnEG_wS5lR5hJ-lP1ULXytThJOt0MxGv22jvBmfmWvCgmv24zTGIDEVD7k23zSFjJf7b";
 
 const OrionContactForm: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -17,8 +20,8 @@ const OrionContactForm: React.FC = () => {
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
 
-  // Pointing to the local Flask API
-  const BACKEND_URL = '/api/contact';
+  // Use the local Flask API endpoint for secure proxying
+  const API_ENDPOINT = "/api/contact";
 
   const packages = [
     { value: "Orion's Gifted-Mpho", label: "Orion's Gifted-Mpho ($149 + $19/mo)", emoji: '🎁' },
@@ -34,24 +37,29 @@ const OrionContactForm: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setStatus({ type: '', message: '' });
 
     try {
-      const response = await fetch(BACKEND_URL, {
+      // Create FormData from the form as requested in the instructions
+      const form = e.currentTarget;
+      const data = new FormData(form);
+      
+      // Optionally append the constants if the backend script requires them in the payload
+      // data.append('google_script_url', GOOGLE_SCRIPT_URL);
+      // data.append('discord_webhook', DISCORD_WEBHOOK);
+
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: data
       });
 
       if (response.ok) {
         setStatus({
           type: 'success',
-          message: '✅ Lead captured! Check your Discord for the alert. We\'ll contact you within 24 hours.'
+          message: '✅ Signal Received! Welcome to Orion HQ.'
         });
 
         // Reset form
@@ -62,12 +70,13 @@ const OrionContactForm: React.FC = () => {
           package: "Orion's Gifted-Mpho",
           message: ''
         });
+        form.reset();
       } else {
-        throw new Error('Server error');
+        throw new Error('Signal lost during transmission');
       }
 
     } catch (error) {
-      console.error('❌ Submission error:', error);
+      console.error('❌ Lead Capture Error:', error);
       setStatus({
         type: 'error',
         message: '❌ Something went wrong. Please WhatsApp us at +27 72 497 1810'

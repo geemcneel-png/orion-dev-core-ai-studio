@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { EnvelopeIcon, PhoneIcon, CheckCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
-// Pointing to the local Flask API instead of the direct external script
+// API routed through the secure Flask backend proxy
 const API_ENDPOINT = "/api/contact";
 
 export const Contact: React.FC = () => {
@@ -16,24 +16,21 @@ export const Contact: React.FC = () => {
     e.preventDefault();
     setStatus('loading');
 
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData.entries());
-    
+    // Using the professional FormData approach as requested
     try {
       const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: new FormData(e.currentTarget),
       });
 
       if (response.ok) {
         setStatus('success');
         (e.target as HTMLFormElement).reset();
       } else {
-        throw new Error('Failed to send');
+        throw new Error('Failed to send signal');
       }
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('Signal transmission failed:', error);
       setStatus('error');
     }
   };
@@ -50,13 +47,13 @@ export const Contact: React.FC = () => {
               <div className="w-24 h-24 bg-green-500/10 border border-green-500/20 rounded-full flex items-center justify-center mb-8">
                 <CheckCircleIcon className="w-12 h-12 text-green-500" />
               </div>
-              <h3 className="text-4xl font-bold text-white mb-4">Message Sent!</h3>
+              <h3 className="text-4xl font-bold text-white mb-4">Signal Received!</h3>
               <p className="text-zinc-400 max-w-md mx-auto mb-10 text-lg">
-                Orion Bolt Pro is reviewing your request. We'll be in touch very soon.
+                Orion Bolt Pro has received your lead. Check your Discord for the notification.
               </p>
               <button 
                 onClick={() => setStatus('idle')}
-                className="px-10 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full font-bold transition-all uppercase tracking-widest text-xs"
+                className="px-10 py-4 bg-zinc-800 hover:bg-zinc-700 text-white rounded-full font-bold transition-all uppercase tracking-widest text-[10px]"
               >
                 Send Another
               </button>
@@ -69,7 +66,7 @@ export const Contact: React.FC = () => {
                     Let's Build Your <br/><span className="text-blue-500">Business Engine</span>
                   </h2>
                   <p className="text-zinc-400 text-xl leading-relaxed font-light">
-                    Stop worrying about the admin. Tell us what you need, and we'll handle the rest. Simple, fast, and automated.
+                    Stop worrying about the admin. Tell us what you need, and we'll handle the rest via Orion Bolt Pro.
                   </p>
                 </div>
 
@@ -98,7 +95,7 @@ export const Contact: React.FC = () => {
                 <div className="pt-6 border-t border-zinc-800">
                   <p className="text-[10px] text-zinc-500 flex items-center font-mono uppercase tracking-widest">
                     <SparklesIcon className="w-4 h-4 mr-3 text-blue-500" />
-                    System Secure & Online
+                    Secure Lead Capture Pipeline
                   </p>
                 </div>
               </div>
@@ -145,10 +142,10 @@ export const Contact: React.FC = () => {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest ml-2">What can we automate?</label>
+                        <label className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest ml-2">How can we automate your day?</label>
                         <textarea 
                             name="message" 
-                            placeholder="Tell us what you do and what's slowing you down..."
+                            placeholder="Tell us what slows you down..."
                             rows={3}
                             className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all placeholder:text-zinc-700 resize-none"
                         ></textarea>
@@ -162,7 +159,7 @@ export const Contact: React.FC = () => {
                         {status === 'loading' ? (
                             <>
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span className="uppercase tracking-widest text-xs">Launching...</span>
+                                <span className="uppercase tracking-widest text-xs">Launching Signal...</span>
                             </>
                         ) : (
                             <>
@@ -173,7 +170,7 @@ export const Contact: React.FC = () => {
                     </button>
                     
                     {status === 'error' && (
-                        <p className="text-center text-red-400 text-[10px] font-mono uppercase tracking-widest animate-pulse">Connection Error. Use WhatsApp instead.</p>
+                        <p className="text-center text-red-400 text-[10px] font-mono uppercase tracking-widest animate-pulse">Transmission Error. Use WhatsApp instead.</p>
                     )}
                 </form>
               </div>
