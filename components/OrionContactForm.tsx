@@ -10,18 +10,18 @@ const OrionContactForm: React.FC = () => {
     fullName: '',
     email: '',
     phone: '',
-    package: "Orion's Gift-Mpho",
+    package: "Orion's Gifted-Mpho",
     message: ''
   });
   
   const [status, setStatus] = useState({ type: '', message: '' });
   const [loading, setLoading] = useState(false);
 
-  // 🔥 YOUR BOLT BACKEND URL
-  const BACKEND_URL = 'https://orion-dev-core-products-912718392001.us-west1.run.app/';
+  // Pointing to the local Flask API
+  const BACKEND_URL = '/api/contact';
 
   const packages = [
-    { value: "Orion's Gift-Mpho", label: "Orion's Gift-Mpho ($149 + $19/mo)", emoji: '🎁' },
+    { value: "Orion's Gifted-Mpho", label: "Orion's Gifted-Mpho ($149 + $19/mo)", emoji: '🎁' },
     { value: 'Orion - Joyful Mandisa', label: 'Orion - Joyful Mandisa ($399 + $59/mo)', emoji: '✨' },
     { value: 'Orion Universe', label: 'Orion Universe ($999 + $149/mo)', emoji: '🪐' }
   ];
@@ -40,33 +40,31 @@ const OrionContactForm: React.FC = () => {
     setStatus({ type: '', message: '' });
 
     try {
-      // Send to BOLT backend
-      await fetch(BACKEND_URL, {
+      const response = await fetch(BACKEND_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-        mode: 'no-cors' // Required for Apps Script or specific server configurations
       });
 
-      // We'll assume success if no error is thrown
-      setStatus({
-        type: 'success',
-        message: '✅ Lead captured! Check your Discord for the alert. We\'ll contact you within 24 hours.'
-      });
+      if (response.ok) {
+        setStatus({
+          type: 'success',
+          message: '✅ Lead captured! Check your Discord for the alert. We\'ll contact you within 24 hours.'
+        });
 
-      // Reset form
-      setFormData({
-        fullName: '',
-        email: '',
-        phone: '',
-        package: "Orion's Gift-Mpho",
-        message: ''
-      });
-
-      // Log success
-      console.log('✅ Lead submitted to BOLT:', formData);
+        // Reset form
+        setFormData({
+          fullName: '',
+          email: '',
+          phone: '',
+          package: "Orion's Gifted-Mpho",
+          message: ''
+        });
+      } else {
+        throw new Error('Server error');
+      }
 
     } catch (error) {
       console.error('❌ Submission error:', error);

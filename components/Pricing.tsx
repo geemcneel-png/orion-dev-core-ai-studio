@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -8,7 +7,7 @@ import { CheckIcon, ChatBubbleLeftRightIcon, MicrophoneIcon } from '@heroicons/r
 
 const pricingData = [
   {
-    name: "Orion's Gift-Mpho",
+    name: "Orion's Gifted-Mpho",
     setup: "$149",
     monthly: "$19",
     target: "Small Projects",

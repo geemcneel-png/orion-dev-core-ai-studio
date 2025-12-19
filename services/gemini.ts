@@ -1,4 +1,3 @@
-
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -20,7 +19,7 @@ MISSION:
 Explain how we make business easier. People hate admin—show them how we take it away.
 
 OUR SERVICES (SIMPLE TERMS):
-1. 🎁 Orion's Gift-Mpho: 
+1. 🎁 Orion's Gifted-Mpho: 
    - A beautiful page for your business.
    - We save your WhatsApp messages to a list so you don't lose them.
    - You get a link to take payments easily from phones.
@@ -43,28 +42,23 @@ STRUCTURED DATA:
 At the end of EVERY response, append the hidden JSON block wrapped in <business_analysis> tags. 
 Analysis keys: "needs_prescriptions_shield", "needs_biometrics", "package_match", "readiness".`;
 
-let chatSession: Chat | null = null;
-
 export async function chatWithMintaka(message: string): Promise<{ text: string, analysis?: any }> {
   try {
     // Re-instantiate AI client every time to ensure it uses the latest process.env.API_KEY
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
-    if (!chatSession) {
-      chatSession = ai.chats.create({
-        model: GEMINI_MODEL,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          temperature: 0.7,
-        },
-      });
-    }
+    // Note: session management is kept simple for this example
+    const chatSession = ai.chats.create({
+      model: GEMINI_MODEL,
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+        temperature: 0.7,
+      },
+    });
 
     const result = await chatSession.sendMessage({ message });
-    // Use the .text property as per guidelines
     const fullText = result.text || "";
     
-    // Extract JSON analysis
     const analysisMatch = fullText.match(/<business_analysis>([\s\S]*?)<\/business_analysis>/);
     const cleanText = fullText.replace(/<business_analysis>[\s\S]*?<\/business_analysis>/, "").trim();
     
@@ -77,14 +71,11 @@ export async function chatWithMintaka(message: string): Promise<{ text: string, 
       }
     }
 
-    // If response is empty for some reason, provide a friendly fallback
     const finalText = cleanText || "I heard you, but my response seems to have vanished! Could you try saying that again?";
 
     return { text: finalText, analysis };
   } catch (error: any) {
     console.error("Gemini Chat Error:", error);
-    // Force session reset on error to allow recovery
-    chatSession = null;
     return { 
         text: "I'm having a little trouble connecting to my brain right now. Please try sending your message again in a moment! ⚡",
         analysis: null
@@ -92,6 +83,7 @@ export async function chatWithMintaka(message: string): Promise<{ text: string, 
   }
 }
 
+let chatSession: Chat | null = null;
 export function resetChat() {
   chatSession = null;
 }

@@ -6,7 +6,8 @@
 import React, { useState } from 'react';
 import { EnvelopeIcon, PhoneIcon, CheckCircleIcon, SparklesIcon } from '@heroicons/react/24/outline';
 
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyz0BZwkSRgDCteiK2GMx4Pn8LUs2tCusdqnodoz7scJW0Hj9euHfdbIIsx4J_J0Brx/exec";
+// Pointing to the local Flask API instead of the direct external script
+const API_ENDPOINT = "/api/contact";
 
 export const Contact: React.FC = () => {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -19,14 +20,18 @@ export const Contact: React.FC = () => {
     const data = Object.fromEntries(formData.entries());
     
     try {
-      await fetch(WEB_APP_URL, {
+      const response = await fetch(API_ENDPOINT, {
         method: 'POST',
-        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      setStatus('success');
-      (e.target as HTMLFormElement).reset();
+
+      if (response.ok) {
+        setStatus('success');
+        (e.target as HTMLFormElement).reset();
+      } else {
+        throw new Error('Failed to send');
+      }
     } catch (error) {
       console.error('Submission error:', error);
       setStatus('error');
@@ -129,7 +134,7 @@ export const Contact: React.FC = () => {
                                 name="package" 
                                 className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 transition-all appearance-none cursor-pointer"
                             >
-                                <option value="Orion's Gift-Mpho">Orion's Gift-Mpho ($149)</option>
+                                <option value="Orion's Gifted-Mpho">Orion's Gifted-Mpho ($149)</option>
                                 <option value="Orion - Joyful Mandisa">Orion - Joyful Mandisa ($399)</option>
                                 <option value="Orion Universe">Orion Universe ($999)</option>
                             </select>
