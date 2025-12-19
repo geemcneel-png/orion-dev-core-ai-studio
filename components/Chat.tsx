@@ -3,6 +3,62 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
+export const Chat: React.FC = () => {
+  // --- NEW ACCESS LOGIC ---
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [partner, setPartner] = useState<any>(null);
+  const [bioInput, setBioInput] = useState('');
+
+  const handleAccess = async () => {
+    // Calling your Flask API (/main.py)
+    const response = await fetch('/api/verify-partner', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bio_id: bioInput })
+    });
+    
+    const result = await response.json();
+    if (result.status === 'success') {
+      setPartner(result);
+      setIsAuthorized(true);
+      // Brief the AI with the spreadsheet data immediately
+      setMessages([{ 
+        role: 'ai', 
+        text: `Access Granted. Welcome back, ${result.name}. I've loaded your ${result.package} modules. How can we push the project forward today? 🚀` 
+      }]);
+    } else {
+      alert("Biometric ID not recognized.");
+    }
+  };
+
+  // --- YOUR EXISTING CHAT STATE ---
+  const [messages, setMessages] = useState<Message[]>([]);
+  // ... rest of your state ...
+
+  if (!isAuthorized) {
+    return (
+      <div className="py-40 flex flex-col items-center justify-center text-center">
+        <div className="w-16 h-16 bg-blue-600 rounded-2xl mb-6 flex items-center justify-center animate-pulse">
+           <ShieldCheckIcon className="w-10 h-10 text-white" />
+        </div>
+        <h2 className="text-3xl font-bold text-white mb-2">Biometric Scan Required</h2>
+        <p className="text-zinc-500 mb-8">Please enter your Orion Access ID to initialize the terminal.</p>
+        <div className="flex space-x-2">
+           <input 
+             value={bioInput}
+             onChange={(e) => setBioInput(e.target.value)}
+             placeholder="BIO-XXXX" 
+             className="bg-zinc-900 border border-zinc-800 p-3 rounded-xl text-white outline-none focus:border-blue-500"
+           />
+           <button onClick={handleAccess} className="bg-blue-600 px-6 py-3 rounded-xl font-bold text-white hover:bg-blue-500 transition-all">
+             Unlock
+           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ... REST OF YOUR BEAUTIFUL CHAT UI CODE ...
 // Inside your React Component
 const [isAuthorized, setIsAuthorized] = useState(false);
 const [partner, setPartner] = useState(null);
