@@ -6,7 +6,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Replace with your actual API Key if not using environment variables
-const genAI = new GoogleGenerativeAI("YOUR_GEMINI_API_KEY_HERE");
+const genAI = new GoogleGenerativeAI("AIzaSyClhNIz0kTpbw2nSt-LBi-0rUcIaq64rVM");
 
 let chatSession: any = null;
 
