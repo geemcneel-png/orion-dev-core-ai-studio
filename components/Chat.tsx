@@ -8,6 +8,7 @@ import {
   ArrowPathIcon 
 } from '@heroicons/react/24/solid';
 import { chatWithMintaka, resetChat as resetGeminiSession } from '../services/gemini';
+import { getPartnerData } from '../services/OrionCore';
 
 interface Message {
     role: 'user' | 'ai';
@@ -39,14 +40,10 @@ export const Chat: React.FC = () => {
         if (!bioInput.trim()) return;
         
         try {
-            const response = await fetch('/api/verify-partner', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bio_id: bioInput })
-            });
+            // This calls the logic in your services/OrionCore.js file
+            const result = await getPartnerData(bioInput);
             
-            const result = await response.json();
-            if (result.status === 'success') {
+            if (result) {
                 setPartner(result);
                 setIsAuthorized(true);
                 setMessages([{ 
@@ -57,7 +54,7 @@ export const Chat: React.FC = () => {
                 alert("Biometric ID not recognized by the Core.");
             }
         } catch (error) {
-            alert("Connection error. Is the Flask API running?");
+            alert("Connection error. Is the Core Engine online?");
         }
     };
 
@@ -79,8 +76,8 @@ export const Chat: React.FC = () => {
         setIsTyping(true);
 
         try {
-            // We pass the partner data so Mintaka knows who she's talking to
-            const { text, analysis: newAnalysis } = await chatWithMintaka(userMsg, partner);
+            // Passing userMsg and the AI Briefing (aiPrompt) from our Sheet
+            const { text, analysis: newAnalysis } = await chatWithMintaka(userMsg, partner.aiPrompt);
             setMessages(prev => [...prev, { role: 'ai', text }]);
             if (newAnalysis) setAnalysis(newAnalysis);
         } catch (error) {
@@ -91,7 +88,7 @@ export const Chat: React.FC = () => {
         }
     };
 
-    // --- VIEW: LOCK SCREEN ---
+    // --- VIEW: LOCK SCREEN (Shown first) ---
     if (!isAuthorized) {
         return (
           <div className="py-40 flex flex-col items-center justify-center text-center animate-in fade-in duration-700">
@@ -116,7 +113,7 @@ export const Chat: React.FC = () => {
         );
     }
 
-    // --- VIEW: MAIN CHAT ---
+    // --- VIEW: MAIN CHAT (Shown after Unlock) ---
     return (
         <div id="chat" className="py-20 px-4 md:px-6 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 animate-in zoom-in-95 duration-500">
             {/* Chat Window */}
@@ -140,7 +137,7 @@ export const Chat: React.FC = () => {
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
                             <div className={`max-w-[85%] rounded-2xl px-5 py-3 text-sm leading-relaxed ${
-                                msg.role === 'user' ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/10' : 'bg-zinc-800 text-zinc-200 shadow-lg border border-zinc-700/50'
+                                msg.role === 'user' ? 'bg-blue-600 text-white shadow-lg' : 'bg-zinc-800 text-zinc-200'
                             }`}>
                                 {msg.text}
                             </div>
@@ -148,7 +145,7 @@ export const Chat: React.FC = () => {
                     ))}
                     {isTyping && (
                         <div className="flex justify-start">
-                            <div className="bg-zinc-800 rounded-2xl px-5 py-3 flex space-x-1.5 shadow-lg">
+                            <div className="bg-zinc-800 rounded-2xl px-5 py-3 flex space-x-1.5">
                                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
                                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
                                 <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
@@ -158,3 +155,32 @@ export const Chat: React.FC = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-4 border-t border-zinc-800 bg-zinc-900/50">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Message Orion Bolt Pro..."
+                            className="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-4 pl-5 pr-14 text-white focus:outline-none focus:border-blue-500"
+                        />
+                        <button type="submit" disabled={!input.trim() || isTyping} className="absolute right-2 top-2 p-3 text-blue-500">
+                            <PaperAirplaneIcon className="w-6 h-6" />
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {/* Sidebar with dynamic stats */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 flex flex-col space-y-6">
+                <h4 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-6">Partner Diagnostics</h4>
+                <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-2xl">
+                    <div className="flex items-center space-x-2 mb-3">
+                        <ShieldCheckIcon className="w-4 h-4 text-blue-500" />
+                        <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-widest">Core Status</span>
+                    </div>
+                    <p className="text-xs text-white">{partner.status}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
